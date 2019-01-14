@@ -164,7 +164,7 @@ class Trainer(object):
 
             loss_sum.backward()
 
-            if 'grad_clip' in self.opts.keys():
+            if 'grad_clip' in self.opts.keys(): # "grad_clip": 40
                 nn.utils.clip_grad_norm_(self.model.ggnn.parameters(), self.opts['grad_clip'])
 
             self.optimizer.step()
@@ -177,7 +177,7 @@ class Trainer(object):
                 for i in range(pred_polys.shape[0]):
                     p = pred_polys[i]
 
-                    mask_poly = utils.get_masked_poly(p, self.model.ggnn.ggnn_grid_size)
+                    mask_poly = utils.get_masked_poly(p, self.model.ggnn.ggnn_grid_size)    #"ggnn_grid_size": 112
                     mask_poly = utils.class_to_xy(mask_poly, self.model.ggnn.ggnn_grid_size)
 
                     curr_gt_poly_112 = utils.poly01_to_poly0g(orig_poly[i], ggnn_grid_size)
@@ -192,7 +192,7 @@ class Trainer(object):
                 accum['loss'] += float(loss_sum.item())
                 accum['iou'] += iou
                 accum['length'] += 1
-                if step % self.opts['print_freq'] == 0:
+                if step % self.opts['print_freq'] == 0: #"print_freq": 20
                     # Mean of accumulated values
                     for k in accum.keys():
                         if k == 'length':
@@ -203,7 +203,7 @@ class Trainer(object):
                     masks = np.expand_dims(masks, -1).astype(np.uint8)  # Add a channel dimension
                     masks = np.tile(masks, [1, 1, 1, 3])  # Make [2, H, W, 3]
                     img = (data['img'].cpu().numpy()[-1, ...] * 255).astype(np.uint8)
-                    img = np.transpose(img, [1, 2, 0])  # Make [H, W, 3]
+                    img = np.transpose(img, [1, 2, 0])  # Make [H, W, 3], swap the dimention
 
                     self.writer.add_image('pred_mask', masks[0], self.global_step)
                     self.writer.add_image('gt_mask', masks[1], self.global_step)
